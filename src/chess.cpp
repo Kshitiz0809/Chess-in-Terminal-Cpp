@@ -3,6 +3,8 @@
 #include <sstream>
 #include <cmath>
 
+using namespace std;
+
 // Simple types
 enum class Color { WHITE, BLACK, NONE };
 
@@ -15,7 +17,7 @@ struct Position {
     bool isValid() const { return row >= 0 && row < 8 && col >= 0 && col < 8; }
 };
 
-Position fromAlgebraic(const std::string& s) {
+Position fromAlgebraic(const string& s) {
     if (s.size() != 2) return Position();
     char file = s[0];
     char rank = s[1];
@@ -89,8 +91,8 @@ public:
         return true;
     }
 
-    std::string render() const {
-        std::ostringstream out;
+    string render() const {
+        ostringstream out;
         out << "\n  +------------------------+\n";
         for (int r = 0; r < 8; ++r) {
             out << (8 - r) << " |";
@@ -151,7 +153,7 @@ private:
     bool pathClearDiagonal(const Position& from, const Position& to) const {
         int dr = to.row - from.row;
         int dc = to.col - from.col;
-        if (std::abs(dr) != std::abs(dc)) return false;
+        if (abs(dr) != abs(dc)) return false;
         int stepR = (dr > 0) ? 1 : -1;
         int stepC = (dc > 0) ? 1 : -1;
         int r = from.row + stepR;
@@ -170,19 +172,19 @@ private:
         int dc = to.col - from.col;
         switch (p.type) {
             case PieceType::KING:
-                return std::abs(dr) <= 1 && std::abs(dc) <= 1;
+                return abs(dr) <= 1 && abs(dc) <= 1;
             case PieceType::QUEEN:
                 if (dr == 0 || dc == 0) return pathClearStraight(from, to);
-                if (std::abs(dr) == std::abs(dc)) return pathClearDiagonal(from, to);
+                if (abs(dr) == abs(dc)) return pathClearDiagonal(from, to);
                 return false;
             case PieceType::ROOK:
                 if (dr == 0 || dc == 0) return pathClearStraight(from, to);
                 return false;
             case PieceType::BISHOP:
-                if (std::abs(dr) == std::abs(dc)) return pathClearDiagonal(from, to);
+                if (abs(dr) == abs(dc)) return pathClearDiagonal(from, to);
                 return false;
             case PieceType::KNIGHT:
-                return (std::abs(dr) * std::abs(dc)) == 2;
+                return (abs(dr) * abs(dc)) == 2;
             case PieceType::PAWN: {
                 int dir = (p.color == Color::WHITE) ? -1 : 1;
                 if (dc == 0 && dr == dir && isEmpty(to)) return true;
@@ -191,7 +193,7 @@ private:
                     Position mid(from.row + dir, from.col);
                     if (isEmpty(mid) && isEmpty(to)) return true;
                 }
-                if (std::abs(dc) == 1 && dr == dir && !isEmpty(to) && at(to).color != p.color) return true;
+                if (abs(dc) == 1 && dr == dir && !isEmpty(to) && at(to).color != p.color) return true;
                 return false;
             }
             default:
@@ -207,7 +209,7 @@ private:
                 if (p.type == PieceType::NONE || p.color != by) continue;
                 if (p.type == PieceType::PAWN) {
                     int dir = (by == Color::WHITE) ? -1 : 1;
-                    if (sq.row == r + dir && std::abs(sq.col - c) == 1) return true;
+                    if (sq.row == r + dir && abs(sq.col - c) == 1) return true;
                     continue;
                 }
                 if (validPieceMove(from, sq) && differentColorOrEmpty(sq, by)) return true;
@@ -231,42 +233,41 @@ private:
     }
 };
 
-// Helpers
-static std::string trim(const std::string& s) {
+static string trim(const string& s) {
     size_t a = s.find_first_not_of(" \t\r\n");
     size_t b = s.find_last_not_of(" \t\r\n");
-    if (a == std::string::npos) return "";
+    if (a == string::npos) return "";
     return s.substr(a, b - a + 1);
 }
 
 int main() {
     Board board;
     Color turn = Color::WHITE;
-    std::cout << "Welcome to Simple Terminal Chess" << std::endl;
-    std::cout << "Enter moves like e2e4 or e2 e4. Type 'quit' to exit." << std::endl;
+    cout << "Welcome to Simple Terminal Chess" << endl;
+    cout << "Enter moves like e2e4 or e2 e4. Type 'quit' to exit." << endl;
 
     while (true) {
-        std::cout << board.render() << std::endl;
-        std::cout << ((turn == Color::WHITE) ? "White" : "Black") << " to move > ";
-        std::string line;
-        if (!std::getline(std::cin, line)) break;
-        std::string in = trim(line);
+        cout << board.render() << endl;
+        cout << ((turn == Color::WHITE) ? "White" : "Black") << " to move > ";
+        string line;
+        if (!getline(cin, line)) break;
+        string in = trim(line);
         if (in == "quit" || in == "exit") break;
         if (in.empty()) continue;
 
-        std::string a, b;
+        string a, b;
         if (in.size() == 4) { a = in.substr(0,2); b = in.substr(2,2); }
-        else { std::istringstream iss(in); iss >> a >> b; }
+        else { istringstream iss(in); iss >> a >> b; }
         Position from = fromAlgebraic(a);
         Position to = fromAlgebraic(b);
-        if (!from.isValid() || !to.isValid()) { std::cout << "Invalid input." << std::endl; continue; }
+        if (!from.isValid() || !to.isValid()) { cout << "Invalid input." << endl; continue; }
 
         if (board.move(from, to, turn)) {
             turn = (turn == Color::WHITE) ? Color::BLACK : Color::WHITE;
         } else {
-            std::cout << "Illegal move." << std::endl;
+            cout << "Illegal move." << endl;
         }
     }
-    std::cout << "Goodbye!" << std::endl;
+    cout << "Goodbye!" << endl;
     return 0;
 }
